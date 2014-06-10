@@ -1,0 +1,7 @@
+base  html
+name  direct html tags plugin
+author Satoshi Sahara
+email  sahara.satoshi@gmail.com
+date   2014-06-10
+desc   Allow direct use of html tag - iframe and img
+url    https://www.dokuwiki.org/plugin:html
