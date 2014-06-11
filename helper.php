@@ -89,4 +89,20 @@ class helper_plugin_html extends DokuWiki_Plugin {
         return $args;
     }
 
+    /* ---------------------------------------------------------
+     * build open tag with attributes
+     * @param (string) $tag      open tag name
+     * @param (array)  $attr     hashed attibutes for the tag
+     * @return (string)          html of open tag
+     * ---------------------------------------------------------
+     */
+    private function buildHtmlTag($tag, $attrs) {
+        $html = '<'.$tag;
+        foreach ($attrs as $key => $value) {
+            $html .= ' '.$key.'="'.$value.'"';
+        }
+        $html .= '>';
+        return $html;
+    }
+
 }

@@ -112,6 +112,7 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
      * Render output
      */
     public function render($format, &$renderer, $indata) {
+        $util =& plugin_load('helper', $this->getPluginName());
 
         if (empty($indata)) return false;
         list($state, $data) = $indata;
@@ -120,7 +121,7 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
         switch ($state) {
             case DOKU_LEXER_SPECIAL:
             case DOKU_LEXER_ENTER:
-                $renderer->doc .= $this->_buildHtmlTag('iframe', $data);
+                $renderer->doc .= $util->buildHtmlTag('iframe', $data);
                 if ($state == DOKU_LEXER_SPECIAL) {
                     $renderer->doc .= '</iframe>'.NL;
                 }
@@ -157,18 +158,6 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
             }
             return $url;
         }
-    }
-
-    /**
-     * build iframe tag with attributes
-     */
-    private function _buildHtmlTag($tag, $attrs) {
-        $html = '<'.$tag;
-        foreach ($attrs as $key => $value) {
-            $html .= ' '.$key.'="'.$value.'"';
-        }
-        $html .= '>';
-        return $html;
     }
 
 }

@@ -109,13 +109,14 @@ class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
      * Render output
      */
     public function render($format, &$renderer, $indata) {
+        $util =& plugin_load('helper', $this->getPluginName());
 
         if (empty($indata)) return false;
         list($state, $data) = $indata;
         if ($format != 'xhtml') return false;
 
         $data['src'] = $this->_resolveSrcUrl($data['src']);
-        $renderer->doc .= $this->_buildHtmlTag('img', $data);
+        $renderer->doc .= $util->buildHtmlTag('img', $data);
         return true;
     }
 
@@ -139,18 +140,6 @@ class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
                 return false;
             }
         }
-    }
-
-    /**
-     * build img tag with attributes
-     */
-    private function _buildHtmlTag($tag, $attrs) {
-        $html = '<'.$tag;
-        foreach ($attrs as $key => $value) {
-            $html .= ' '.$key.'="'.$value.'"';
-        }
-        $html .= '>';
-        return $html;
     }
 
 }
