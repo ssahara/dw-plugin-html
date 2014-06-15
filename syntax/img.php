@@ -67,7 +67,7 @@ class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
         $opts = $util->cleanArguments($opts, $this->spec_keys);
         if (!empty($url))   $opts['src'] = trim($url);
         if (!empty($title)) $opts['title'] = trim($title);
-
+/*
         // Check css vulnerability, not allow JavaScript insertion
         if (array_key_exists('style', $opts)) {
             if ((stristr($opts['style'], 'url') !== false) ||
@@ -102,6 +102,7 @@ class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
                 $opts['title'] = is_null($title) ? '' : trim($title);
             }
         }
+*/
         return array($state, $opts);
     }
 
@@ -115,9 +116,49 @@ class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
         list($state, $data) = $indata;
         if ($format != 'xhtml') return false;
 
-        $data['src'] = $this->_resolveSrcUrl($data['src']);
-        $renderer->doc .= $util->buildHtmlTag('img', $data);
-        return true;
+        $linkId = $data['src'];
+        $this->_checkAttributes($data);
+
+        if ($data['src'] == false) {
+            $message = $this->getPluginName().'_'.$this->getPluginComponent().
+                ': not image src ('.$linkId.')';
+            $renderer->doc .= $util->msg($message, -1);
+            return false;
+        } else {
+            $renderer->doc .= $util->buildHtmlTag('img', $data);
+            return true;
+        }
+    }
+
+
+    /**
+     * verify attribute of img tags
+     */
+    private function _checkAttributes(&$opts) {
+
+        // Check css vulnerability, not allow JavaScript insertion
+        if (array_key_exists('style', $opts)) {
+            if ((stristr($opts['style'], 'url') !== false) ||
+                (stristr($opts['style'], 'import') !== false) ||
+                (stristr($opts['style'], 'javascript:') !== false)) {
+                unset($opts['style']);
+            }
+        }
+
+        // Check alignment (wiki-style)
+        if (!array_key_exists('align', $opts)) {
+            $ralign = (bool)preg_match('/^ /',$url);
+            $lalign = (bool)preg_match('/ $/',$url);
+            if ( $lalign && $ralign ) { $opts['align'] = 'center';
+            } else if ( $ralign ) {     $opts['align'] = 'right';
+            } else if ( $lalign ) {     $opts['align'] = 'left';
+            } else { $align = null; }
+        }
+
+        // Check src and title attribute
+        if (array_key_exists('src', $opts)) {
+            $opts['src'] = $this->_resolveSrcUrl($opts['src']);
+        }
     }
 
 
@@ -136,10 +177,21 @@ class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
                 $url = ml($linkId);
                 return $url;
             } else { //pageID?
-                msg($this->getPluginName().': not image src="'.$linkId.'"' , -1);
+                //msg($this->getPluginName().': not image src="'.$linkId.'"' , -1);
                 return false;
             }
         }
     }
+
+/*
+    function _buildHtmlTag($tag, $attrs) {
+        $html = '<'.$tag;
+        foreach ($attrs as $key => $value) {
+            $html .= ' '.$key.'="'.$value.'"';
+        }
+        $html .= '>';
+        return $html;
+    }
+*/
 
 }

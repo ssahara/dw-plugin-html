@@ -9,6 +9,35 @@
 if(!defined('DOKU_INC')) die();
 
 class helper_plugin_html extends DokuWiki_Plugin {
+
+    /**
+     * Returns some documentation of the methods provided by this helper part
+     *
+     * @return array Method description
+     */
+
+    function getMethods() {
+        $result = array();
+        $result[] = array(
+                'name'   => 'buildHtmlTag',
+                'desc'   => 'build open tag with attributes',
+                'params' => array(
+                        'tag'=>'string',
+                        'attrs' => 'array'),
+                'return' => array('html' => 'string'),
+        );
+        $result[] = array(
+                'name'   => 'msg',
+                'desc'   => 'print a message',
+                'params' => array(
+                        'message'=>'string',
+                        'lvl' => 'integer'),
+                'return' => array('html' => 'string'),
+        );
+        return $result;
+    }
+
+
     /* ---------------------------------------------------------
      * get each named/non-named arguments as array variable
      *
@@ -96,12 +125,31 @@ class helper_plugin_html extends DokuWiki_Plugin {
      * @return (string)          html of open tag
      * ---------------------------------------------------------
      */
-    private function buildHtmlTag($tag, $attrs) {
+
+    function buildHtmlTag($tag, $attrs) {
         $html = '<'.$tag;
         foreach ($attrs as $key => $value) {
             $html .= ' '.$key.'="'.$value.'"';
         }
         $html .= '>';
+        return $html;
+    }
+
+    /* ---------------------------------------------------------
+     * print a message
+     * @param (string) $message  
+     * @param (integer) $lvl     
+     * @return (string)          
+     * ---------------------------------------------------------
+     */
+    function msg($message, $lvl=0) {
+        $msgclass = array(
+           -1  => 'msg error',
+            0  => 'msg info',
+            1  => 'msg success',
+            2  => 'msg notify',
+        );
+        $html = '<div class="'.$msgclass[$lvl].'">'.$message.'</div>'.NL;
         return $html;
     }
 

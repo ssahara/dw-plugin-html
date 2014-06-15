@@ -82,25 +82,8 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
                 $opts = $util->cleanArguments($opts, $this->spec_keys);
                 if (!empty($resource)) $opts['src'] = trim($resource);
                 if (!empty($title))    $opts['title'] = trim($title);
-
-                // check css vulnerability, not allow JavaScript insertion
-                if (array_key_exists('style', $opts)) {
-                    if ((stristr($opts['style'], 'url') !== false) ||
-                        (stristr($opts['style'], 'import') !== false) ||
-                        (stristr($opts['style'], 'javascript:') !== false)) {
-                        unset($opts['style']);
-                    }
-                }
-                if (array_key_exists('src', $opts)) {
-                    if (preg_match('/^https?:\/\//', $opts['src'])) {
-                        if ($ACT='preview') {
-                            msg($this->getPluginName().': iframe src="'.$opts['src'].'"' ,0);
-                        }
-                    } else {
-                        $opts['src'] = $this->_resolveSrcUrl($opts['src']);
-                    }
-                }
                 return array($state, $opts);
+
             case DOKU_LEXER_UNMATCHED:
                 return array($state, '');
             case DOKU_LEXER_EXIT:
@@ -121,7 +104,17 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
         switch ($state) {
             case DOKU_LEXER_SPECIAL:
             case DOKU_LEXER_ENTER:
-                $renderer->doc .= $util->buildHtmlTag('iframe', $data);
+                $linkId = $data['src'];
+                $this->_checkAttributes($data);
+                if ($data['src'] == false) {
+                    $message = $this->getPluginName().'_'.$this->getPluginComponent().
+                        ': page not exists ('.$linkId.')';
+                    $renderer->doc .= $util->msg($message, -1);
+                    return false;
+                    break;
+                } else {
+                    $renderer->doc .= $util->buildHtmlTag('iframe', $data);
+                }
                 if ($state == DOKU_LEXER_SPECIAL) {
                     $renderer->doc .= '</iframe>'.NL;
                 }
@@ -133,6 +126,26 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
                 break;
         }
         return true;
+    }
+
+
+    /**
+     * verify attribute of iframe tags
+     */
+    private function _checkAttributes(&$tokens) {
+
+        // check css vulnerability, not allow JavaScript insertion
+        if (array_key_exists('style', $tokens)) {
+            if ((stristr($tokens['style'], 'url') !== false) ||
+                (stristr($tokens['style'], 'import') !== false) ||
+                (stristr($tokens['style'], 'javascript:') !== false)) {
+                unset($tokens['style']);
+            }
+        }
+        // resolve src attribute
+        if (array_key_exists('src', $tokens)) {
+            $tokens['src'] = $this->_resolveSrcUrl($tokens['src']);
+        }
     }
 
 
@@ -149,15 +162,28 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
             list($ext, $mime) = mimetype($linkId);
             if (substr($mime, 0, 5) == 'image') { // mediaID
                 $url = ml($linkId);
-            } else { //pageID
-                if (!$exists) msg('page not exists ('.$linkId.')',-1);
+            } elseif ($exists) { //pageID
                 list($id, $section) = explode('#', $linkId, 2);
                 $url = wl($id);
                 $url.= ((strpos($url,'?')!==false) ? '&':'?').'do=export_xhtml';
                 $url.= $section ? '#'.$section : '';
+            } else {
+                //msg('page not exists ('.$linkId.')',-1);
+                $url = false;
             }
             return $url;
         }
     }
+
+/*
+    function _buildHtmlTag($tag, $attrs) {
+        $html = '<'.$tag;
+        foreach ($attrs as $key => $value) {
+            $html .= ' '.$key.'="'.$value.'"';
+        }
+        $html .= '>';
+        return $html;
+    }
+*/
 
 }
