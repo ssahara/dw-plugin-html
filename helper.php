@@ -23,7 +23,7 @@ class helper_plugin_html extends DokuWiki_Plugin {
                 'desc'   => 'build open tag with attributes',
                 'params' => array(
                         'tag'=>'string',
-                        'attrs' => 'array'),
+                        'attrs (optional)' => 'array'),
                 'return' => array('html' => 'string'),
         );
         $result[] = array(
@@ -31,7 +31,7 @@ class helper_plugin_html extends DokuWiki_Plugin {
                 'desc'   => 'print a message',
                 'params' => array(
                         'message'=>'string',
-                        'lvl' => 'integer'),
+                        'lvl (optional)' => 'integer'),
                 'return' => array('html' => 'string'),
         );
         return $result;
@@ -121,12 +121,12 @@ class helper_plugin_html extends DokuWiki_Plugin {
     /* ---------------------------------------------------------
      * build open tag with attributes
      * @param (string) $tag      open tag name
-     * @param (array)  $attr     hashed attibutes for the tag
+     * @param (array)  $attrs    hashed attibutes for the tag
      * @return (string)          html of open tag
      * ---------------------------------------------------------
      */
 
-    function buildHtmlTag($tag, $attrs) {
+    function buildHtmlTag($tag, $attrs=NULL) {
         $html = '<'.$tag;
         foreach ($attrs as $key => $value) {
             $html .= ' '.$key.'="'.$value.'"';
@@ -138,7 +138,7 @@ class helper_plugin_html extends DokuWiki_Plugin {
     /* ---------------------------------------------------------
      * print a message
      * @param (string) $message  
-     * @param (integer) $lvl     
+     * @param (integer) $lvl     -1 = error, 0 = info, 1 = success, 2 = notify
      * @return (string)          
      * ---------------------------------------------------------
      */
