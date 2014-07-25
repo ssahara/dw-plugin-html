@@ -21,8 +21,10 @@ require_once DOKU_PLUGIN.'syntax.php';
 
 class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
 
-    protected $spec_keys, $spec_default;
-    function __construct() {
+    protected $pluginMode, $spec_keys, $spec_default;
+    public function __construct() {
+        $this->pluginMode = implode('_', array('plugin',
+            $this->getPluginName(),$this->getPluginComponent(),));
 
         // attibutes acceptable for <img> tag
         $this->spec_keys = array(
@@ -43,18 +45,14 @@ class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
     public function getPType() { return 'normal'; }
     public function getSort()  { return 305; }
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern('{{img\b.*?\>.*?}}',$mode,
-            implode('_', array('plugin',$this->getPluginName(),$this->getPluginComponent(),))
-        );
-        $this->Lexer->addSpecialPattern('<img\b.*?>',$mode,
-            implode('_', array('plugin',$this->getPluginName(),$this->getPluginComponent(),))
-        );
+        $this->Lexer->addSpecialPattern('{{img\b.*?\>.*?}}', $mode, $pluginMode);
+        $this->Lexer->addSpecialPattern('<img\b.*?>', $mode, $pluginMode);
     }
 
     /**
      * handle syntax
      */
-    public function handle($match, $state, $pos, &$handler){
+    public function handle($match, $state, $pos, Doku_Handler &$handler){
         global $ACT;
         $util =& plugin_load('helper', $this->getPluginName());
 
@@ -109,7 +107,7 @@ class syntax_plugin_html_img extends DokuWiki_Syntax_Plugin {
     /**
      * Render output
      */
-    public function render($format, &$renderer, $indata) {
+    public function render($format, Doku_Renderer &$renderer, $indata) {
         $util =& plugin_load('helper', $this->getPluginName());
 
         if (empty($indata)) return false;

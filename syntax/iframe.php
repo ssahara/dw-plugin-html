@@ -24,8 +24,10 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
     protected $exit_pattern    = '</iframe>';
     protected $special_pattern = '{{iframe\b.*?\>.*?}}';
 
-    protected $spec_keys, $spec_default;
-    function __construct() {
+    protected $pluginMode, $spec_keys, $spec_default;
+    public function __construct() {
+        $this->pluginMode = implode('_', array('plugin',
+            $this->getPluginName(),$this->getPluginComponent(),));
 
         // attibutes acceptable for <iframe> tag
         $this->spec_keys = array(
@@ -49,24 +51,18 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
     public function getPType() { return 'normal'; }
     public function getSort()  { return 305; }
     public function connectTo($mode) {
-        $this->Lexer->addSpecialPattern($this->special_pattern,$mode,
-            implode('_', array('plugin',$this->getPluginName(),$this->getPluginComponent(),))
-        );
-        $this->Lexer->addEntryPattern($this->entry_pattern,$mode,
-            implode('_', array('plugin',$this->getPluginName(),$this->getPluginComponent(),))
-        );
+        $this->Lexer->addSpecialPattern($this->special_pattern, $mode, $this->pluginMode);
+        $this->Lexer->addEntryPattern($this->entry_pattern, $mode, $this->pluginMode);
     }
     function postConnect() {
-        $this->Lexer->addExitPattern($this->exit_pattern,
-            implode('_', array('plugin',$this->getPluginName(),$this->getPluginComponent(),))
-        );
+        $this->Lexer->addExitPattern($this->exit_pattern, $this->pluginMode);
     }
 
 
     /**
      * handle syntax
      */
-    public function handle($match, $state, $pos, &$handler){
+    public function handle($match, $state, $pos, Doku_Handler &$handler){
         global $ACT;
         $util =& plugin_load('helper', $this->getPluginName());
 
@@ -94,7 +90,7 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
     /**
      * Render output
      */
-    public function render($format, &$renderer, $indata) {
+    public function render($format, Doku_Renderer &$renderer, $indata) {
         $util =& plugin_load('helper', $this->getPluginName());
 
         if (empty($indata)) return false;
