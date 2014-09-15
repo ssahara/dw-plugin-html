@@ -26,8 +26,7 @@ class syntax_plugin_html_iframe extends DokuWiki_Syntax_Plugin {
 
     protected $pluginMode, $spec_keys, $spec_default;
     public function __construct() {
-        $this->pluginMode = implode('_', array('plugin',
-            $this->getPluginName(),$this->getPluginComponent(),));
+        $this->pluginMode = substr(get_class($this), 7); // drop 'syntax_'
 
         // attibutes acceptable for <iframe> tag
         $this->spec_keys = array(
